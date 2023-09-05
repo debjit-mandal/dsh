@@ -13,4 +13,4 @@ To run it locally-
 
 5. `./dsh.py`
 
-   Feel free to suggest any kind of improvements
+Feel free to suggest any kind of improvements
