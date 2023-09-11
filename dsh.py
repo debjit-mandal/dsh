@@ -5,21 +5,36 @@ import readline
 import os
 import shlex
 
+readline.parse_and_bind("tab: complete")
 
 def execute_command(command):
+    cmd_list = shlex.split(command)
 
+    if cmd_list[0] == "cd":
+        handle_cd_command(cmd_list)
+    elif cmd_list[0] == "help":
+        display_help()
+    else:
+        run_system_command(cmd_list)
+
+def handle_cd_command(cmd_list):
     try:
-        cmd_list = shlex.split(command)
+        path = cmd_list[1] if len(cmd_list) > 1 else os.path.expanduser("~")
+        os.chdir(path)
+    except OSError as e:
+        print(f"Error changing directory: {e}")
 
-        if cmd_list[0] == "cd":
-            try:
-                path = cmd_list[1] if len(
-                    cmd_list) > 1 else os.path.expanduser("~")
-                os.chdir(path)
-            except OSError as e:
-                print(f"Error changing directory: {e}")
-            return
+def display_help():
+    help_text = """
+    CustomShell Built-in Commands:
+    cd [directory]   - Change directory.
+    help             - Display this help message.
+    exit / quit      - Exit the shell.
+    """
+    print(help_text)
 
+def run_system_command(cmd_list):
+    try:
         result = subprocess.run(cmd_list, capture_output=True, text=True)
         if result.stdout:
             print(result.stdout, end="")
@@ -29,7 +44,6 @@ def execute_command(command):
         print(f"Command not found: {cmd_list[0]}")
     except Exception as e:
         print(f"Error executing command: {e}")
-
 
 def dsh():
     while True:
@@ -50,6 +64,7 @@ def dsh():
         except EOFError:
             break
 
-
 if __name__ == "__main__":
     dsh()
+
+
