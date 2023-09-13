@@ -7,152 +7,122 @@ import shlex
 import signal
 import json
 import logging
+from pathlib import Path
 
-CONFIG_FILE = os.path.expanduser("~/.dsh_config.json")
-HISTORY_FILE = os.path.expanduser("~/.dsh_history")
-LOG_FILE = os.path.expanduser("~/.dsh_log.txt")
+CONFIG_PATH = Path("~/.dsh_config.json").expanduser()
+HISTORY_PATH = Path("~/.dsh_history").expanduser()
+LOG_PATH = Path("~/.dsh_log.txt").expanduser()
 
-logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
+logging.basicConfig(filename=LOG_PATH, level=logging.INFO)
+
+class CommandContext:
+    def __init__(self, env):
+        self.env = env
+
+class Command:
+    registry = {}
+
+    @classmethod
+    def register(cls, name):
+        def wrapper(subclass):
+            cls.registry[name] = subclass()
+            return subclass
+        return wrapper
+
+    def execute(self, args, context):
+        raise NotImplementedError
+
+    @classmethod
+    def help_text(cls):
+        return cls.__doc__
+
+@Command.register('setenv')
+class SetEnvCommand(Command):
+    """Set an environment variable: setenv VAR_NAME VAR_VALUE"""
+    
+    def execute(self, args, context):
+        context.env[args[1]] = args[2]
+
+@Command.register('getenv')
+class GetEnvCommand(Command):
+    """Get the value of an environment variable: getenv VAR_NAME"""
+    
+    def execute(self, args, context):
+        print(context.env.get(args[1], "Variable not set."))
+
+class CommandParser:
+    @staticmethod
+    def parse(command):
+        return shlex.split(command)
+
+class Configuration:
+    def __init__(self):
+        self.config = self.load_config()
+
+    def load_config(self):
+        if CONFIG_PATH.exists():
+            with open(CONFIG_PATH, 'r') as file:
+                return json.load(file)
+        return {"aliases": {}}
+
+    def get(self, key, default=None):
+        return self.config.get(key, default)
 
 class dsh:
     def __init__(self):
-        self.load_config()
+        self.config = Configuration()
         self.setup_readline()
         self.setup_signals()
 
-    def load_config(self):
-        """Load user-specific configurations or default if not present."""
-        default_config = {
-            "aliases": {
-                "ls": "ls --color=auto",
-                "ll": "ls -la"
-            },
-            "history_length": 1000
-        }
-        if os.path.exists(CONFIG_FILE):
-            with open(CONFIG_FILE, 'r') as f:
-                try:
-                    self.config = json.load(f)
-                    if not self.validate_config():
-                        raise ValueError("Invalid configuration")
-                except json.JSONDecodeError:
-                    logging.error("Failed to decode JSON config. Using default config.")
-                    self.config = default_config
-                except ValueError as e:
-                    logging.error(e)
-                    self.config = default_config
-        else:
-            self.config = default_config
-            with open(CONFIG_FILE, 'w') as f:
-                json.dump(default_config, f, indent=4)
-
-        self.aliases = self.config["aliases"]
-        readline.set_history_length(self.config["history_length"])
-
-    def validate_config(self):
-        """Validate the loaded configuration structure."""
-        if not ("aliases" in self.config and "history_length" in self.config):
-            return False
-        if not isinstance(self.config["history_length"], int):
-            return False
-        if not isinstance(self.config["aliases"], dict):
-            return False
-        return True
-
     def setup_readline(self):
-        """Set up the readline for command history and completion."""
-        readline.parse_and_bind("tab: complete")
-        if os.path.exists(HISTORY_FILE):
-            readline.read_history_file(HISTORY_FILE)
-        readline.set_completer(self.complete)
+        if HISTORY_PATH.exists():
+            readline.read_history_file(HISTORY_PATH)
+        history_length = self.config.get("history_length", 1000)
+        readline.set_history_length(history_length)
 
     def setup_signals(self):
-        """Setup signal handlers for graceful interrupt handling."""
-        signal.signal(signal.SIGINT, self.sigint_handler)
+        signal.signal(signal.SIGINT, self.signal_handler)
 
-    def complete(self, text, state):
-        """Provide command auto-completion."""
-        builtins = ['cd', 'help', 'exit', 'quit']
-        return ([
-            cmd for cmd in builtins if cmd.startswith(text)
-        ] + [filename for filename in os.listdir() if filename.startswith(text)])[state]
+    def signal_handler(self, sig, frame):
+        print("\nInterrupted!")
+        
+    def handle_aliases(self, cmd_list):
+        cmd = cmd_list[0]
+        alias_cmd = self.config.get("aliases").get(cmd, cmd)
+        return shlex.split(alias_cmd) + cmd_list[1:]
 
     def execute_command(self, command):
-        """Dispatch and execute a given command."""
-        cmd_list = shlex.split(command)
-        cmd = self.aliases.get(cmd_list[0], cmd_list[0])
-        cmd_list[0] = cmd
+        cmd_list = CommandParser.parse(command)
+        cmd_list = self.handle_aliases(cmd_list)
+        cmd = cmd_list[0]
+        context = CommandContext(os.environ)
 
-        if cmd_list[0] == "cd":
-            self.handle_cd_command(cmd_list)
-        elif cmd_list[0] == "help":
-            self.display_help()
+        if cmd in Command.registry:
+            try:
+                Command.registry[cmd].execute(cmd_list, context)
+            except Exception as e:
+                logging.error(f"Error in command {cmd}: {e}")
+                print(f"Command error: {e}")
         else:
             self.run_system_command(cmd_list)
 
-    def handle_cd_command(self, cmd_list):
-        """Change directory or report an error."""
-        try:
-            path = cmd_list[1] if len(cmd_list) > 1 else os.getenv("HOME")
-            os.chdir(path)
-        except OSError as e:
-            error_message = f"Error changing directory: {e}"
-            print(error_message)
-            logging.error(error_message)
-
-    def display_help(self):
-        """Display available commands."""
-        help_text = """
-    dsh Built-in Commands:
-    cd [directory]   - Change directory.
-    help             - Display this help message.
-    exit / quit      - Exit the shell.
-    """
-        print(help_text)
-
     def run_system_command(self, cmd_list):
-        """Execute a system command."""
         try:
-            result = subprocess.run(cmd_list, capture_output=True, text=True)
-            if result.stdout:
-                print(result.stdout, end="")
-            if result.stderr:
-                print(result.stderr, end="")
-                logging.error(result.stderr)
-        except FileNotFoundError:
-            error_message = f"Command not found: {cmd_list[0]}"
-            print(error_message)
-            logging.error(error_message)
+            subprocess.run(cmd_list)
         except Exception as e:
-            error_message = f"Error executing command: {e}"
-            print(error_message)
-            logging.error(error_message)
-
-    def sigint_handler(self, signal, frame):
-        """Handle Ctrl+C events."""
-        print("\n^C")
-        print(self.prompt(), end="")
-        readline.redisplay()
-
-    def prompt(self):
-        """Render the shell prompt."""
-        return f"{os.getcwd()} > "
+            logging.error(f"Error executing system command {cmd_list[0]}: {e}")
+            print(f"Error executing command: {e}")
 
     def loop(self):
-        """Main loop to keep the shell running."""
         while True:
             try:
-                command = input(self.prompt()).strip()
-                if not command:
-                    continue
-                if command in ['exit', 'quit']:
-                    readline.write_history_file(HISTORY_FILE)
-                    break
-                logging.info(f"Executed command: {command}")
-                self.execute_command(command)
-            except EOFError:  
-                readline.write_history_file(HISTORY_FILE)
+                command = input(f"{os.getcwd()} $ ")
+                if command.strip():
+                    self.execute_command(command)
+            except EOFError:
+                print("\nExiting...")
                 break
+        readline.write_history_file(HISTORY_PATH)
 
 if __name__ == "__main__":
     shell = dsh()
