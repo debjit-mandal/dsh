@@ -12,17 +12,16 @@ CONFIG_FILE = os.path.expanduser("~/.dsh_config.json")
 HISTORY_FILE = os.path.expanduser("~/.dsh_history")
 LOG_FILE = os.path.expanduser("~/.dsh_log.txt")
 
-# Initialize logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
 class dsh:
-
     def __init__(self):
         self.load_config()
         self.setup_readline()
         self.setup_signals()
 
     def load_config(self):
+        """Load user-specific configurations or default if not present."""
         default_config = {
             "aliases": {
                 "ls": "ls --color=auto",
@@ -30,10 +29,18 @@ class dsh:
             },
             "history_length": 1000
         }
-
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE, 'r') as f:
-                self.config = json.load(f)
+                try:
+                    self.config = json.load(f)
+                    if not self.validate_config():
+                        raise ValueError("Invalid configuration")
+                except json.JSONDecodeError:
+                    logging.error("Failed to decode JSON config. Using default config.")
+                    self.config = default_config
+                except ValueError as e:
+                    logging.error(e)
+                    self.config = default_config
         else:
             self.config = default_config
             with open(CONFIG_FILE, 'w') as f:
@@ -42,22 +49,36 @@ class dsh:
         self.aliases = self.config["aliases"]
         readline.set_history_length(self.config["history_length"])
 
+    def validate_config(self):
+        """Validate the loaded configuration structure."""
+        if not ("aliases" in self.config and "history_length" in self.config):
+            return False
+        if not isinstance(self.config["history_length"], int):
+            return False
+        if not isinstance(self.config["aliases"], dict):
+            return False
+        return True
+
     def setup_readline(self):
+        """Set up the readline for command history and completion."""
         readline.parse_and_bind("tab: complete")
         if os.path.exists(HISTORY_FILE):
             readline.read_history_file(HISTORY_FILE)
         readline.set_completer(self.complete)
 
     def setup_signals(self):
+        """Setup signal handlers for graceful interrupt handling."""
         signal.signal(signal.SIGINT, self.sigint_handler)
 
     def complete(self, text, state):
+        """Provide command auto-completion."""
         builtins = ['cd', 'help', 'exit', 'quit']
         return ([
             cmd for cmd in builtins if cmd.startswith(text)
         ] + [filename for filename in os.listdir() if filename.startswith(text)])[state]
 
     def execute_command(self, command):
+        """Dispatch and execute a given command."""
         cmd_list = shlex.split(command)
         cmd = self.aliases.get(cmd_list[0], cmd_list[0])
         cmd_list[0] = cmd
@@ -70,6 +91,7 @@ class dsh:
             self.run_system_command(cmd_list)
 
     def handle_cd_command(self, cmd_list):
+        """Change directory or report an error."""
         try:
             path = cmd_list[1] if len(cmd_list) > 1 else os.getenv("HOME")
             os.chdir(path)
@@ -79,6 +101,7 @@ class dsh:
             logging.error(error_message)
 
     def display_help(self):
+        """Display available commands."""
         help_text = """
     dsh Built-in Commands:
     cd [directory]   - Change directory.
@@ -88,6 +111,7 @@ class dsh:
         print(help_text)
 
     def run_system_command(self, cmd_list):
+        """Execute a system command."""
         try:
             result = subprocess.run(cmd_list, capture_output=True, text=True)
             if result.stdout:
@@ -105,14 +129,17 @@ class dsh:
             logging.error(error_message)
 
     def sigint_handler(self, signal, frame):
+        """Handle Ctrl+C events."""
         print("\n^C")
         print(self.prompt(), end="")
         readline.redisplay()
 
     def prompt(self):
+        """Render the shell prompt."""
         return f"{os.getcwd()} > "
 
     def loop(self):
+        """Main loop to keep the shell running."""
         while True:
             try:
                 command = input(self.prompt()).strip()
