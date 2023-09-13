@@ -5,25 +5,47 @@ import readline
 import os
 import shlex
 import signal
+import json
+import logging
 
+CONFIG_FILE = os.path.expanduser("~/.dsh_config.json")
 HISTORY_FILE = os.path.expanduser("~/.dsh_history")
-HISTORY_LENGTH = 1000
+LOG_FILE = os.path.expanduser("~/.dsh_log.txt")
+
+# Initialize logging
+logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
 class dsh:
 
     def __init__(self):
-        # self.aliases = {
-            # 'ls': 'ls --color=auto',
-            # 'll': 'ls -la'
-        # }
+        self.load_config()
         self.setup_readline()
         self.setup_signals()
+
+    def load_config(self):
+        default_config = {
+            "aliases": {
+                "ls": "ls --color=auto",
+                "ll": "ls -la"
+            },
+            "history_length": 1000
+        }
+
+        if os.path.exists(CONFIG_FILE):
+            with open(CONFIG_FILE, 'r') as f:
+                self.config = json.load(f)
+        else:
+            self.config = default_config
+            with open(CONFIG_FILE, 'w') as f:
+                json.dump(default_config, f, indent=4)
+
+        self.aliases = self.config["aliases"]
+        readline.set_history_length(self.config["history_length"])
 
     def setup_readline(self):
         readline.parse_and_bind("tab: complete")
         if os.path.exists(HISTORY_FILE):
             readline.read_history_file(HISTORY_FILE)
-        readline.set_history_length(HISTORY_LENGTH)
         readline.set_completer(self.complete)
 
     def setup_signals(self):
@@ -37,8 +59,8 @@ class dsh:
 
     def execute_command(self, command):
         cmd_list = shlex.split(command)
-        # cmd = self.aliases.get(cmd_list[0], cmd_list[0])
-        # cmd_list[0] = cmd
+        cmd = self.aliases.get(cmd_list[0], cmd_list[0])
+        cmd_list[0] = cmd
 
         if cmd_list[0] == "cd":
             self.handle_cd_command(cmd_list)
@@ -52,7 +74,9 @@ class dsh:
             path = cmd_list[1] if len(cmd_list) > 1 else os.getenv("HOME")
             os.chdir(path)
         except OSError as e:
-            print(f"Error changing directory: {e}")
+            error_message = f"Error changing directory: {e}"
+            print(error_message)
+            logging.error(error_message)
 
     def display_help(self):
         help_text = """
@@ -70,10 +94,15 @@ class dsh:
                 print(result.stdout, end="")
             if result.stderr:
                 print(result.stderr, end="")
+                logging.error(result.stderr)
         except FileNotFoundError:
-            print(f"Command not found: {cmd_list[0]}")
+            error_message = f"Command not found: {cmd_list[0]}"
+            print(error_message)
+            logging.error(error_message)
         except Exception as e:
-            print(f"Error executing command: {e}")
+            error_message = f"Error executing command: {e}"
+            print(error_message)
+            logging.error(error_message)
 
     def sigint_handler(self, signal, frame):
         print("\n^C")
@@ -92,6 +121,7 @@ class dsh:
                 if command in ['exit', 'quit']:
                     readline.write_history_file(HISTORY_FILE)
                     break
+                logging.info(f"Executed command: {command}")
                 self.execute_command(command)
             except EOFError:  
                 readline.write_history_file(HISTORY_FILE)
