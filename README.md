@@ -13,4 +13,16 @@ To run it locally-
 
 5. `./dsh.py`
 
+Create a `~/.dsh_config.json` file with necessary details and aliases:
+```
+{
+        "aliases": {
+            "ls": "ls --color=auto",
+            "ll": "ls -l",
+            "la": "ls -la"
+        },
+        "history_length":1000
+}
+```
+
 Feel free to suggest any kind of improvements
