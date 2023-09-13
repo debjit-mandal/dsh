@@ -13,7 +13,7 @@ CONFIG_PATH = Path("~/.dsh_config.json").expanduser()
 HISTORY_PATH = Path("~/.dsh_history").expanduser()
 LOG_PATH = Path("~/.dsh_log.txt").expanduser()
 
-logging.basicConfig(filename=LOG_PATH, level=logging.INFO)
+logging.basicConfig(filename=LOG_PATH, level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 class CommandContext:
     def __init__(self, env):
@@ -38,17 +38,43 @@ class Command:
 
 @Command.register('setenv')
 class SetEnvCommand(Command):
-    """Set an environment variable: setenv VAR_NAME VAR_VALUE"""
     
     def execute(self, args, context):
         context.env[args[1]] = args[2]
 
 @Command.register('getenv')
 class GetEnvCommand(Command):
-    """Get the value of an environment variable: getenv VAR_NAME"""
     
     def execute(self, args, context):
         print(context.env.get(args[1], "Variable not set."))
+
+@Command.register('cd')
+class ChangeDirectoryCommand(Command):
+    
+    def execute(self, args, context):
+        os.chdir(args[1])
+
+@Command.register('help')
+class HelpCommand(Command):
+    
+    def execute(self, args, context):
+        for cmd, cmd_obj in Command.registry.items():
+            print(f"{cmd}: {cmd_obj.help_text()}")
+
+@Command.register('reload_config')
+class ReloadConfigCommand(Command):
+
+    def execute(self, args, context):
+        global config
+        config = Configuration()
+        print("Configuration reloaded.")
+
+@Command.register('exit')
+class ExitCommand(Command):
+    
+    def execute(self, args, context):
+        print("Exiting...")
+        raise SystemExit
 
 class CommandParser:
     @staticmethod
@@ -68,17 +94,30 @@ class Configuration:
     def get(self, key, default=None):
         return self.config.get(key, default)
 
+config = Configuration()
+
 class dsh:
     def __init__(self):
-        self.config = Configuration()
         self.setup_readline()
         self.setup_signals()
 
     def setup_readline(self):
         if HISTORY_PATH.exists():
             readline.read_history_file(HISTORY_PATH)
-        history_length = self.config.get("history_length", 1000)
+        history_length = config.get("history_length", 1000)
         readline.set_history_length(history_length)
+        readline.set_completer(self.complete)
+        readline.parse_and_bind("tab: complete")
+
+    def complete(self, text, state):
+        options = [i for i in Command.registry.keys() if i.startswith(text)]
+        if state < len(options):
+            return options[state]
+        else:
+            files = [f for f in os.listdir('.') if f.startswith(text)]
+            if state < len(options) + len(files):
+                return files[state - len(options)]
+        return None
 
     def setup_signals(self):
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -88,7 +127,7 @@ class dsh:
         
     def handle_aliases(self, cmd_list):
         cmd = cmd_list[0]
-        alias_cmd = self.config.get("aliases").get(cmd, cmd)
+        alias_cmd = config.get("aliases").get(cmd, cmd)
         return shlex.split(alias_cmd) + cmd_list[1:]
 
     def execute_command(self, command):
