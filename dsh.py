@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
 
-import subprocess
-import readline
-import os
-import shlex
-import signal
 import json
 import logging
+import os
+import readline
+import shlex
+import signal
+import subprocess
 from pathlib import Path
 
 CONFIG_PATH = Path("~/.dsh_config.json").expanduser()
 HISTORY_PATH = Path("~/.dsh_history").expanduser()
 LOG_PATH = Path("~/.dsh_log.txt").expanduser()
 
-logging.basicConfig(filename=LOG_PATH, level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(
+    filename=LOG_PATH,
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+
 
 class CommandContext:
     def __init__(self, env):
         self.env = env
+
 
 class Command:
     registry = {}
@@ -30,38 +36,81 @@ class Command:
         return wrapper
 
     def execute(self, args, context):
+        try:
+            if args:
+                return self.run(args, context)
+            else:
+                print("No arguments provided. Usage:")
+                print(self.help_text())
+        except Exception as e:
+            print(f"Error executing command: {str(e)}")
+
+    def run(self, args, context):
         raise NotImplementedError
 
     @classmethod
     def help_text(cls):
         return cls.__doc__
 
-@Command.register('setenv')
-class SetEnvCommand(Command):
-    
-    def execute(self, args, context):
-        context.env[args[1]] = args[2]
+# Help Command
 
-@Command.register('getenv')
+
+@Command.register("help")
+class HelpCommand(Command):
+    """Display information about available commands. Usage: help [command_name]"""
+
+    def run(self, args, context):
+        if len(args) > 1:
+            command = args[1]
+            if command in Command.registry:
+                print(Command.registry[command].help_text())
+            else:
+                print(f"No help available for {command}")
+        else:
+            print("Available commands:")
+            for name, cmd in Command.registry.items():
+                print(f"{name} - {cmd.help_text().split('.')[0]}")
+
+# Example SetEnvCommand with detailed help
+
+
+@Command.register("setenv")
+class SetEnvCommand(Command):
+    """Set an environment variable. Usage: setenv [variable] [value]"""
+
+    def run(self, args, context):
+        if len(args) < 3:
+            print("Insufficient arguments. Usage: setenv [variable] [value]")
+        else:
+            context.env[args[1]] = args[2]
+            print(f"Environment variable {args[1]} set to {args[2]}")
+
+# Signal handling and other foundational aspects remain unchanged
+
+
+@Command.register("getenv")
 class GetEnvCommand(Command):
-    
+
     def execute(self, args, context):
         print(context.env.get(args[1], "Variable not set."))
 
-@Command.register('cd')
+
+@Command.register("cd")
 class ChangeDirectoryCommand(Command):
-    
+
     def execute(self, args, context):
         os.chdir(args[1])
 
-@Command.register('help')
+
+@Command.register("help")
 class HelpCommand(Command):
-    
+
     def execute(self, args, context):
         for cmd, cmd_obj in Command.registry.items():
             print(f"{cmd}: {cmd_obj.help_text()}")
 
-@Command.register('reload_config')
+
+@Command.register("reload_config")
 class ReloadConfigCommand(Command):
 
     def execute(self, args, context):
@@ -69,17 +118,20 @@ class ReloadConfigCommand(Command):
         config = Configuration()
         print("Configuration reloaded.")
 
-@Command.register('exit')
+
+@Command.register("exit")
 class ExitCommand(Command):
-    
+
     def execute(self, args, context):
         print("Exiting...")
         raise SystemExit
+
 
 class CommandParser:
     @staticmethod
     def parse(command):
         return shlex.split(command)
+
 
 class Configuration:
     def __init__(self):
@@ -87,14 +139,16 @@ class Configuration:
 
     def load_config(self):
         if CONFIG_PATH.exists():
-            with open(CONFIG_PATH, 'r') as file:
+            with open(CONFIG_PATH, "r") as file:
                 return json.load(file)
         return {"aliases": {}}
 
     def get(self, key, default=None):
         return self.config.get(key, default)
 
+
 config = Configuration()
+
 
 class dsh:
     def __init__(self):
@@ -114,7 +168,7 @@ class dsh:
         if state < len(options):
             return options[state]
         else:
-            files = [f for f in os.listdir('.') if f.startswith(text)]
+            files = [f for f in os.listdir(".") if f.startswith(text)]
             if state < len(options) + len(files):
                 return files[state - len(options)]
         return None
@@ -124,7 +178,7 @@ class dsh:
 
     def signal_handler(self, sig, frame):
         print("\nInterrupted!")
-        
+
     def handle_aliases(self, cmd_list):
         cmd = cmd_list[0]
         alias_cmd = config.get("aliases").get(cmd, cmd)
@@ -162,6 +216,7 @@ class dsh:
                 print("\nExiting...")
                 break
         readline.write_history_file(HISTORY_PATH)
+
 
 if __name__ == "__main__":
     shell = dsh()
