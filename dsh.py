@@ -52,7 +52,6 @@ class Command:
     def help_text(cls):
         return cls.__doc__
 
-# Help Command
 
 
 @Command.register("help")
@@ -71,7 +70,6 @@ class HelpCommand(Command):
             for name, cmd in Command.registry.items():
                 print(f"{name} - {cmd.help_text().split('.')[0]}")
 
-# Example SetEnvCommand with detailed help
 
 
 @Command.register("setenv")
@@ -85,7 +83,6 @@ class SetEnvCommand(Command):
             context.env[args[1]] = args[2]
             print(f"Environment variable {args[1]} set to {args[2]}")
 
-# Signal handling and other foundational aspects remain unchanged
 
 
 @Command.register("getenv")
