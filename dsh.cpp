@@ -61,7 +61,6 @@ public:
     }
 };
 
-// List Files Command
 class ListFilesCommand : public Command
 {
 public:
@@ -88,6 +87,7 @@ public:
         return "Lists files in the current or specified directory. Usage: ls [directory]";
     }
 };
+
 class ListFilesDetailCommand : public Command
 {
 public:
@@ -141,7 +141,6 @@ public:
     }
 };
 
-// Change Directory Command
 class ChangeDirectoryCommand : public Command
 {
 public:
@@ -162,7 +161,6 @@ public:
     }
 };
 
-// Print Working Directory Command
 class PrintWorkingDirectoryCommand : public Command
 {
 public:
@@ -184,7 +182,6 @@ public:
     }
 };
 
-// Help Command
 class HelpCommand : public Command
 {
 public:
@@ -205,7 +202,6 @@ public:
     }
 };
 
-// Copy File Command
 class CopyFileCommand : public Command
 {
 public:
@@ -228,7 +224,6 @@ public:
     }
 };
 
-// Delete File Command
 class DeleteFileCommand : public Command
 {
 public:
@@ -254,7 +249,6 @@ public:
     }
 };
 
-// Echo Command
 class EchoCommand : public Command
 {
 public:
@@ -272,7 +266,6 @@ public:
     }
 };
 
-// Make Directory Command
 class MakeDirectoryCommand : public Command
 {
 public:
@@ -298,7 +291,6 @@ public:
     }
 };
 
-// Move File Command
 class MoveFileCommand : public Command
 {
 public:
@@ -324,7 +316,6 @@ public:
     }
 };
 
-// System Info Command
 class SystemInfoCommand : public Command
 {
 public:
@@ -338,7 +329,6 @@ public:
     }
 };
 
-// SetEnv Command
 class SetEnvCommand : public Command
 {
 public:
@@ -360,7 +350,6 @@ public:
     }
 };
 
-// View File Content Command
 class CatCommand : public Command
 {
 public:
@@ -392,7 +381,6 @@ public:
     }
 };
 
-// Search File Command
 class GrepCommand : public Command
 {
 public:
@@ -427,7 +415,6 @@ public:
     }
 };
 
-// System Monitor Command
 class TopCommand : public Command
 {
 public:
@@ -441,7 +428,6 @@ public:
     }
 };
 
-// Network Configuration Command
 class IfconfigCommand : public Command
 {
 public:
@@ -455,7 +441,6 @@ public:
     }
 };
 
-// Find Files Command
 class FindCommand : public Command
 {
 public:
@@ -475,7 +460,6 @@ public:
     }
 };
 
-// Download File Command
 class WgetCommand : public Command
 {
 public:
@@ -495,7 +479,6 @@ public:
     }
 };
 
-// Hex Dump Command
 class HexDumpCommand : public Command
 {
 public:
@@ -515,7 +498,6 @@ public:
     }
 };
 
-// Process List Command
 class PsCommand : public Command
 {
 public:
@@ -529,7 +511,6 @@ public:
     }
 };
 
-// Network Statistics Command
 class NetstatCommand : public Command
 {
 public:
@@ -543,7 +524,6 @@ public:
     }
 };
 
-// Shutdown Command
 class ShutdownCommand : public Command
 {
 public:
@@ -564,7 +544,6 @@ public:
     }
 };
 
-// Tail File Command
 class TailCommand : public Command
 {
 public:
@@ -584,7 +563,6 @@ public:
     }
 };
 
-// Edit File Command
 class NanoCommand : public Command
 {
 public:
@@ -604,7 +582,6 @@ public:
     }
 };
 
-// Simple HTTP Server Command
 class HttpCommand : public Command
 {
 public:
@@ -624,7 +601,6 @@ public:
     }
 };
 
-// Permission Change Command
 class ChmodCommand : public Command
 {
 public:
@@ -644,7 +620,6 @@ public:
     }
 };
 
-// File Ownership Change Command
 class ChownCommand : public Command
 {
 public:
@@ -664,7 +639,6 @@ public:
     }
 };
 
-// Sort File Command
 class SortCommand : public Command
 {
 public:
@@ -684,7 +658,6 @@ public:
     }
 };
 
-// Unique Lines Command
 class UniqCommand : public Command
 {
 public:
@@ -704,7 +677,6 @@ public:
     }
 };
 
-// Word Count Command
 class WcCommand : public Command
 {
 public:
@@ -724,7 +696,6 @@ public:
     }
 };
 
-// Disk Free Command
 class DfCommand : public Command
 {
 public:
@@ -738,7 +709,6 @@ public:
     }
 };
 
-// Ping Command
 class PingCommand : public Command
 {
 public:
@@ -758,7 +728,6 @@ public:
     }
 };
 
-// Environment Variable Display Command
 class EnvCommand : public Command
 {
 public:
@@ -788,7 +757,6 @@ public:
     }
 };
 
-// Symbolic Link Creation Command
 class LnCommand : public Command
 {
 public:
@@ -808,7 +776,6 @@ public:
     }
 };
 
-// Change Group Ownership Command
 class ChgrpCommand : public Command
 {
 public:
@@ -828,7 +795,6 @@ public:
     }
 };
 
-// System Uptime Command
 class UptimeCommand : public Command
 {
 public:
@@ -842,7 +808,6 @@ public:
     }
 };
 
-// Memory Usage Command
 class FreeCommand : public Command
 {
 public:
@@ -856,7 +821,6 @@ public:
     }
 };
 
-// Who is Logged On Command
 class WhoCommand : public Command
 {
 public:
@@ -870,7 +834,6 @@ public:
     }
 };
 
-// Trace Route Command
 class TracerouteCommand : public Command
 {
 public:
@@ -890,7 +853,6 @@ public:
     }
 };
 
-// Script Execution Command
 class BashCommand : public Command
 {
 public:
@@ -909,7 +871,6 @@ public:
     }
 };
 
-// Compression Command
 class GzipCommand : public Command
 {
 public:
@@ -929,7 +890,6 @@ public:
     }
 };
 
-// Kill Process Command
 class KillCommand : public Command
 {
 public:
@@ -949,7 +909,6 @@ public:
     }
 };
 
-// Search Text Command
 class AwkCommand : public Command
 {
 public:
@@ -968,7 +927,6 @@ public:
     }
 };
 
-// Display System Information Command
 class UnameCommand : public Command
 {
 public:
@@ -987,7 +945,6 @@ public:
     }
 };
 
-// Interactive File Viewer Command
 class LessCommand : public Command
 {
 public:
@@ -1007,7 +964,6 @@ public:
     }
 };
 
-// Date and Time Command
 class DateCommand : public Command
 {
 public:
@@ -1033,7 +989,6 @@ public:
     }
 };
 
-// Mount Command
 class MountCommand : public Command
 {
 public:
@@ -1053,7 +1008,6 @@ public:
     }
 };
 
-// Unmount Command
 class UmountCommand : public Command
 {
 public:
@@ -1073,7 +1027,6 @@ public:
     }
 };
 
-// Change System Runlevel Command
 class InitCommand : public Command
 {
 public:
@@ -1093,7 +1046,6 @@ public:
     }
 };
 
-// Display Login History Command
 class LastCommand : public Command
 {
 public:
@@ -1107,7 +1059,6 @@ public:
     }
 };
 
-// Network Scanning Command
 class NmapCommand : public Command
 {
 public:
@@ -1126,7 +1077,6 @@ public:
     }
 };
 
-// View Process Details Command
 class PsAuxCommand : public Command
 {
 public:
@@ -1140,7 +1090,6 @@ public:
     }
 };
 
-// Monitor Network Traffic Command
 class TcpdumpCommand : public Command
 {
 public:
@@ -1159,7 +1108,6 @@ public:
     }
 };
 
-// Change File Timestamp Command
 class TouchCommand : public Command
 {
 public:
@@ -1179,7 +1127,6 @@ public:
     }
 };
 
-// View Manual Pages Command
 class ManCommand : public Command
 {
 public:
@@ -1199,7 +1146,6 @@ public:
     }
 };
 
-// File Synchronization Command
 class RsyncCommand : public Command
 {
 public:
@@ -1218,7 +1164,6 @@ public:
     }
 };
 
-// SQL Database Interaction Command
 class SqlCommand : public Command
 {
 public:
@@ -1237,7 +1182,6 @@ public:
     }
 };
 
-// Version Control with Git Command
 class GitCommand : public Command
 {
 public:
@@ -1256,7 +1200,6 @@ public:
     }
 };
 
-// Python Execution Command
 class PythonCommand : public Command
 {
 public:
@@ -1275,7 +1218,6 @@ public:
     }
 };
 
-// Environment Variables List Command
 class EnvListCommand : public Command
 {
 public:
@@ -1289,7 +1231,6 @@ public:
     }
 };
 
-// Compile C++ Code Command
 class GppCommand : public Command
 {
 public:
@@ -1309,7 +1250,6 @@ public:
     }
 };
 
-// File Encryption Command
 class EncryptCommand : public Command
 {
 public:
@@ -1329,7 +1269,6 @@ public:
     }
 };
 
-// File Difference Viewer Command
 class DiffCommand : public Command
 {
 public:
@@ -1349,7 +1288,6 @@ public:
     }
 };
 
-// Network Interface Monitor Command
 class IfstatCommand : public Command
 {
 public:
@@ -1363,7 +1301,6 @@ public:
     }
 };
 
-// System Load Viewer Command
 class HtopCommand : public Command
 {
 public:
@@ -1377,7 +1314,6 @@ public:
     }
 };
 
-// Open File Viewer Command
 class VimCommand : public Command
 {
 public:
@@ -1397,7 +1333,6 @@ public:
     }
 };
 
-// Stream Editor Command
 class SedCommand : public Command
 {
 public:
@@ -1417,7 +1352,6 @@ public:
     }
 };
 
-// Backup and Restore Command
 class TarCommand : public Command
 {
 public:
@@ -1442,7 +1376,6 @@ public:
     }
 };
 
-// User Login Command
 class LoginCommand : public Command
 {
 public:
@@ -1462,7 +1395,6 @@ public:
     }
 };
 
-// Service Management Command
 class ServiceCommand : public Command
 {
 public:
@@ -1482,7 +1414,6 @@ public:
     }
 };
 
-// Disk Usage Analysis Command
 class DuCommand : public Command
 {
 public:
@@ -1502,7 +1433,6 @@ public:
     }
 };
 
-// Database Management Command
 class MysqlCommand : public Command
 {
 public:
@@ -1522,7 +1452,6 @@ public:
     }
 };
 
-// Batch Job Scheduler Command
 class CronCommand : public Command
 {
 public:
@@ -1541,7 +1470,6 @@ public:
     }
 };
 
-// Monitor File System Changes Command
 class InotifyCommand : public Command
 {
 public:
@@ -1560,7 +1488,6 @@ public:
     }
 };
 
-// Play Media Files Command
 class PlayCommand : public Command
 {
 public:
@@ -1580,7 +1507,6 @@ public:
     }
 };
 
-// Execute Scripts Command
 class ExecCommand : public Command
 {
 public:
@@ -1596,6 +1522,95 @@ public:
     std::string helpText() override
     {
         return "Executes scripts or other programs. Usage: exec [command]";
+    }
+};
+
+class WatchCommand : public Command
+{
+public:
+    void execute(const std::vector<std::string> &args) override
+    {
+        if (args.size() < 3)
+        {
+            std::cout << "Usage: watch [interval] [command]\n";
+            return;
+        }
+        int interval = std::stoi(args[1]);
+        std::string command;
+        for (size_t i = 2; i < args.size(); ++i)
+        {
+            command += args[i] + " ";
+        }
+        while (true)
+        {
+            system("clear");
+            system(command.c_str());
+            std::cout << "-----\nPress CTRL+C to stop...\n";
+            sleep(interval);
+        }
+    }
+    std::string helpText() override
+    {
+        return "Executes a command repeatedly, displaying the output. Usage: watch [interval] [command]";
+    }
+};
+
+class ScreenCommand : public Command
+{
+public:
+    void execute(const std::vector<std::string> &args) override
+    {
+        std::string command = "screen";
+        for (size_t i = 1; i < args.size(); ++i)
+        {
+            command += " " + args[i];
+        }
+        system(command.c_str());
+    }
+    std::string helpText() override
+    {
+        return "Starts a screen session. Usage: screen [options]";
+    }
+};
+
+class IPTablesCommand : public Command
+{
+public:
+    void execute(const std::vector<std::string> &args) override
+    {
+        std::string command = "iptables";
+        for (size_t i = 1; i < args.size(); ++i)
+        {
+            command += " " + args[i];
+        }
+        system(command.c_str());
+    }
+    std::string helpText() override
+    {
+        return "Administrate IP packet filter rules. Usage: iptables [options]";
+    }
+};
+
+class SSHCommand : public Command
+{
+public:
+    void execute(const std::vector<std::string> &args) override
+    {
+        if (args.size() < 2)
+        {
+            std::cout << "Usage: ssh [user@hostname]\n";
+            return;
+        }
+        std::string command = "ssh " + args[1];
+        for (size_t i = 2; i < args.size(); ++i)
+        {
+            command += " " + args[i];
+        }
+        system(command.c_str());
+    }
+    std::string helpText() override
+    {
+        return "Connects to a host via SSH. Usage: ssh [user@hostname] [options]";
     }
 };
 
@@ -1679,23 +1694,26 @@ int main()
     registry.registerCommand("inotify", new InotifyCommand());
     registry.registerCommand("play", new PlayCommand());
     registry.registerCommand("exec", new ExecCommand());
+    registry.registerCommand("watch", new WatchCommand());
+    registry.registerCommand("screen", new ScreenCommand());
+    registry.registerCommand("iptables", new IPTablesCommand());
+    registry.registerCommand("ssh", new SSHCommand());
 
-    std::cout << "Welcome to dsh\n";
+    std::cout << "Welcome to DSH\n";
     char *input, shell_prompt[100];
     rl_bind_key('\t', rl_complete);
 
     while (true)
     {
-        snprintf(shell_prompt, sizeof(shell_prompt), "%s: ", getcwd(NULL, 0)); // Use getcwd
+        snprintf(shell_prompt, sizeof(shell_prompt), "%s: ", getcwd(NULL, 0));
         std::cout << std::flush;
         input = readline(shell_prompt);
         if (!input)
-            break; // Check for EOF.
+            break;
 
         if (input && *input)
-            add_history(input); // Add non-empty input to history
+            add_history(input);
 
-        // Parse the input into tokens
         std::vector<std::string> tokens;
         std::istringstream iss(input);
         std::string token;
@@ -1703,7 +1721,7 @@ int main()
         {
             tokens.push_back(token);
         }
-        free(input); // Free readline allocated input
+        free(input);
 
         if (tokens.empty())
             continue;
