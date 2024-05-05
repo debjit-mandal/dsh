@@ -17,6 +17,7 @@
 #include <readline/history.h>
 #include <string>
 #include <set>
+#include <bits/stdc++.h>
 
 class Command
 {
@@ -29,6 +30,7 @@ class CommandRegistry
 {
 private:
     std::map<std::string, Command *> commands;
+    std::map<std::string, std::string> aliases;
 
 public:
     ~CommandRegistry()
@@ -44,6 +46,9 @@ public:
     }
     Command *getCommand(const std::string &commandName)
     {
+        if (aliases.count(commandName)) {
+            return commands[aliases[commandName]];
+        }
         auto it = commands.find(commandName);
         if (it != commands.end())
         {
@@ -59,7 +64,34 @@ public:
             std::cout << command.first << " - " << command.second->helpText() << "\n";
         }
     }
+    void registerAlias(const std::string& aliasName, const std::string& commandName) {
+        aliases[aliasName] = commandName;
+    }
 };
+
+void loadDshrc(const std::string& path, CommandRegistry& registry) {
+    std::ifstream file(path);
+    std::string line;
+    while (getline(file, line)) {
+        std::istringstream iss(line);
+        std::vector<std::string> tokens(std::istream_iterator<std::string>{iss}, {});
+        if (!tokens.empty()) {
+            if (tokens[0] == "alias" && tokens.size() >= 3) {
+                std::string alias = tokens[1];
+                std::string actualCommand = line.substr(line.find("\"") + 1, line.rfind("\"") - line.find("\"") - 1);
+                registry.registerAlias(alias, actualCommand);
+            } else {
+                Command* cmd = registry.getCommand(tokens[0]);
+                if (cmd) {
+                    cmd->execute(tokens);
+                } else {
+                    std::cout << "Unknown command or alias in .dshrc: " << tokens[0] << "\n";
+                }
+            }
+        }
+    }
+}
+
 
 class ListFilesCommand : public Command
 {
@@ -1698,6 +1730,13 @@ int main()
     registry.registerCommand("screen", new ScreenCommand());
     registry.registerCommand("iptables", new IPTablesCommand());
     registry.registerCommand("ssh", new SSHCommand());
+
+    const char* homeDir = getenv("HOME");
+    if (homeDir != nullptr) {
+        std::string dshrcPath = std::string(homeDir) + "/.dshrc";
+        loadDshrc(dshrcPath, registry);
+    }
+
 
     std::cout << "Welcome to DSH\n";
     char *input, shell_prompt[100];
