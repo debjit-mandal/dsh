@@ -1,7 +1,7 @@
 # dsh
 A Command-Line Shell made using C++
 
-**To run it locally-**
+**To run it locally:**
 
 1. Fork this repository
    
@@ -9,7 +9,7 @@ A Command-Line Shell made using C++
 
 3. `cd dsh`
 
-4. `g++ -o dsh dsh.cpp`
+4. `g++ -o dsh dsh.cpp -lreadline`
 
 5. `./dsh`
 
@@ -93,6 +93,28 @@ Here is a list of commands supported by DSH along with their brief descriptions:
 - **`watch`**: Executes a command repeatedly, displaying the output.
 - **`wget`**: Downloads files from the internet.
 - **`who`**: Displays who is logged on.
+
+---
+
+DSH can be customized by using a configuration file **.dshrc** which can be loaded at the start of each DSH session to configure environment settings, define aliases, set variables, customize the prompt, and more.
+
+## Example `.dshrc` Configuration:
+
+Here’s a basic .dshrc file with comments explaining each part:
+
+```
+# Set environment variables
+setenv PATH /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+setenv EDITOR vim
+
+# Aliases (needs implementation in the shell)
+alias ll "ls -l"
+alias la "ls -a"
+alias l "ls -CF"
+
+# Custom commands
+echo Welcome to DSH!
+```
 
 ---
 
